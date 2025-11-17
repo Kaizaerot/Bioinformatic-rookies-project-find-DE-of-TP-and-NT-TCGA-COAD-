@@ -149,8 +149,7 @@ p_volcano <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
     color = "Directionc Result"
   ) +
   coord_cartesian(
-    xlim = c(min(volc$logFC) * 1.05,
-             max(volc$logFC) * 1.05),
+    xlim = c(-10, 10),
     ylim = c(0, max(volc$neglog10FDR) * 1.05)
   ) +
   theme_light(base_size = 13) +
@@ -185,4 +184,3 @@ write.csv(sig_all, "COAD_miRNA_significant_TP_vs_NT.csv",   row.names = TRUE)
 # =============================================================================
 # End of pipeline
 # =============================================================================
-
