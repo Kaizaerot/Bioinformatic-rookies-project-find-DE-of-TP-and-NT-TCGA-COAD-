@@ -11,8 +11,6 @@ suppressPackageStartupMessages({
   library(edgeR)
   library(ggplot2)
   library(ggrepel)
-  library(pheatmap) # optional heatmap later
-  # library(httpgd) # optional browser plotting
 })
 
 # ------------------------------- 1) Settings ---------------------------------
@@ -145,18 +143,19 @@ p_volcano <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   # colors & labels
   scale_color_manual(values = c("Up (TP)"="#FF3030", "Down (TP)"="#4876FF", "NS"="#A2B5CD")) +
   labs(
-    title = "Tumor Primary (TP) vs Normal (NT) — TCGA-COAD miRNA(edgeR)",
+    title = "Tumor Primary (TP) vs Normal (NT) — TCGA-COAD miRNA (edgeR)",
     x = "log2 Fold Change (TP - NT)",
     y = "-log10(FDR)",
     color = "Directionc Result"
   ) +
   coord_cartesian(
-    xlim = c(-10, 10),   # narrower X-axis range (was automatic before)
-    ylim = c(0, 250)   # higher Y-axis range → makes the plot taller
+    xlim = c(min(volc$logFC) * 1.05,
+             max(volc$logFC) * 1.05),
+    ylim = c(0, max(volc$neglog10FDR) * 1.05)
   ) +
   theme_light(base_size = 13) +
   theme(
-    plot.title = element_text(hjust = 0.5, family = "Arial", face = "bold"),
+    plot.title = element_text(hjust = 0.6, face = "bold"),
     legend.position = "right",
     axis.title.x = element_text(face = "bold"),
     axis.title.y = element_text(face = "bold"), 
@@ -165,7 +164,7 @@ p_volcano <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   )
 
 print(p_volcano)
-# ggsave("Volcano_pretty_TP_vs_NT_COAD.png", p_pretty, width = 7, height = 6, dpi = 300)
+# ggsave("Volcano_TP_vs_NT_COAD.png", p_volcano, width = 7, height = 6, dpi = 300)
 
 # ----------------------- 8) Optional: Fold-Change Summary --------------------
 # log2CPM group means (helpful for intuition/report tables)
@@ -182,15 +181,6 @@ write.csv(fc_tbl, "COAD_miRNA_log2FC_from_logCPM_TP_minus_NT.csv", row.names = F
 write.csv(up_tp,   "COAD_miRNA_upregulated_TP_vs_NT.csv",   row.names = TRUE)
 write.csv(down_tp, "COAD_miRNA_downregulated_TP_vs_NT.csv", row.names = TRUE)
 write.csv(sig_all, "COAD_miRNA_significant_TP_vs_NT.csv",   row.names = TRUE)
-
-# -------------------- 10) (Optional) Heatmap of Top DE -----------------------
-# topN <- 40
-# top_features <- rownames(sig_all)[seq_len(min(topN, nrow(sig_all)))]
-# Z <- scale(t(logCPM[top_features, ]))  # samples x features
-# ann <- data.frame(Group = group)
-# rownames(ann) <- colnames(logCPM)
-# pheatmap(t(Z), annotation_col = ann, show_rownames = FALSE,
-#          main = sprintf("Top %d DE miRNAs — TP vs NT", length(top_features)))
 
 # =============================================================================
 # End of pipeline
