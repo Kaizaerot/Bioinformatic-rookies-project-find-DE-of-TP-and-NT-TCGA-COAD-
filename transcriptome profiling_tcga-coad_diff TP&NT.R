@@ -110,13 +110,13 @@ volc <- de %>%
     neglog10FDR = -log10(pmax(FDR, .Machine$double.xmin)),
     status = case_when(
       FDR < fdr_cutoff & logFC >=  lfc_cutoff  ~ "Up (TP)",    # higher in tumor
-      FDR < fdr_cutoff & logFC <= -lfc_cutoff  ~ "Down (TP)",  # lower in tumor
+      FDR < fdr_cutoff & logFC <= -lfc_cutoff  ~ "Down (NT)",  # lower in tumor
       TRUE                                     ~ "NS"          # not significant
     )
   )
 
 up_tp    <- volc %>% filter(status == "Up (TP)")   %>% arrange(FDR, desc(abs(logFC)))
-down_tp  <- volc %>% filter(status == "Down (TP)") %>% arrange(FDR, desc(abs(logFC)))
+down_tp  <- volc %>% filter(status == "Down (NT)") %>% arrange(FDR, desc(abs(logFC)))
 sig_all  <- volc %>% filter(status != "NS")        %>% arrange(FDR)
 
 message(">> Significant counts:")
@@ -141,7 +141,7 @@ p_volcano <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   geom_hline(yintercept = y_cut, linetype = "dashed", linewidth = 0.4) +
   geom_vline(xintercept = c(-lfc_cutoff, lfc_cutoff), linetype = "dashed", color = "grey60", linewidth = 0.4) +
   # colors & labels
-  scale_color_manual(values = c("Up (TP)"="#FF3030", "Down (TP)"="#4876FF", "NS"="#A2B5CD")) +
+  scale_color_manual(values = c("Up (TP)"="#FF3030", "Down (NT)"="#C0FF3E", "NS"="#A2B5CD")) +
   labs(
     title = "Tumor Primary (TP) vs Normal (NT) — TCGA-COAD miRNA (edgeR)",
     x = "log2 Fold Change (TP - NT)",
