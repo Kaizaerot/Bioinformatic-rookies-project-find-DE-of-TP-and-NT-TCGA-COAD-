@@ -141,7 +141,7 @@ p_volcano <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   geom_hline(yintercept = y_cut, linetype = "dashed", linewidth = 0.4) +
   geom_vline(xintercept = c(-lfc_cutoff, lfc_cutoff), linetype = "dashed", color = "grey60", linewidth = 0.4) +
   # colors & labels
-  scale_color_manual(values = c("Up (TP)"="#FF3030", "Down (NT)"="#C0FF3E", "NS"="#A2B5CD")) +
+  scale_color_manual(values = c("Up (TP)"="#FF3030", "Down (NT)"="#54FF9F", "NS"="#A2B5CD")) +
   labs(
     title = "Tumor Primary (TP) vs Normal (NT) — TCGA-COAD miRNA (edgeR)",
     x = "log2 Fold Change (TP - NT)",
@@ -185,3 +185,4 @@ write.csv(sig_all, "COAD_miRNA_significant_TP_vs_NT.csv",   row.names = TRUE)
 # =============================================================================
 # End of pipeline
 # =============================================================================
+
