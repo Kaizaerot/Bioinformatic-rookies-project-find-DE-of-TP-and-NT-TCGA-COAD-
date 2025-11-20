@@ -1,5 +1,5 @@
 # =============================================================================
-# Project 2: TCGA-COAD miRNA — Tumor Primary (TP) vs Normal (NT)
+# Project 2: Transcriptome Profiling TCGA-COAD miRNA — Tumor Primary (TP) vs Normal (NT)
 # Pipeline: Query → Prepare → Normalize (TMM) → edgeR DE → Volcano → Exports
 # =============================================================================
 
@@ -16,7 +16,7 @@ suppressPackageStartupMessages({
 # ------------------------------- 1) Settings ---------------------------------
 fdr_cutoff   <- 0.05          # significance threshold after multiple testing
 lfc_cutoff   <- 1.0           # sets the log₂ fold change threshold # |log2FC| >= 1 (≈2x change)
-label_top_n  <- 15            # number of miRNAs to label on the plot
+label_top_n  <- 20            # number of miRNAs to label on the plot
 set.seed(42)                  # fixes randomization for reproducibility
 
 # Helper: NULL-coalescing
@@ -75,7 +75,7 @@ barcodes <- colnames(counts)
 
 message(">> Samples per group:")
 print(table(group))
-stopifnot(all(table(group) > 0)) # both NT & TP must exist
+stopifnot(all(table(group) > 0)) # both NT & TP exist
 
 # --------------------------- 5) edgeR DE Analysis ----------------------------
 message(">> edgeR: filtering, normalization, GLM (TP vs NT) ...")
@@ -129,10 +129,10 @@ to_label <- volc %>% filter(status != "NS") %>% arrange(FDR) %>% head(label_top_
 y_cut <- -log10(fdr_cutoff)
 
 p_volcano <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
-  # grey band for low significance (bottom strip)
+  # (bottom strip)
   annotate("rect", xmin = -Inf, xmax = Inf, ymin = 0, ymax = y_cut,
            fill = "#F0F0F0", alpha = 1) +
-  # grey band for small effect (middle vertical strip)
+  # (middle vertical strip)
   annotate("rect", xmin = -lfc_cutoff, xmax =  lfc_cutoff, ymin = 0, ymax = Inf,
            fill = "#F5F5F5", alpha = 1) +
   # points
@@ -177,9 +177,9 @@ fc_tbl <- tibble(
 write.csv(fc_tbl, "COAD_miRNA_log2FC_from_logCPM_TP_minus_NT.csv", row.names = FALSE)
 
 # ------------------------------ 9) Save Outputs ------------------------------
-write.csv(up_tp,   "COAD_miRNA_upregulated_TP_vs_NT.csv",   row.names = TRUE)
-write.csv(down_tp, "COAD_miRNA_downregulated_TP_vs_NT.csv", row.names = TRUE)
-write.csv(sig_all, "COAD_miRNA_significant_TP_vs_NT.csv",   row.names = TRUE)
+#write.csv(up_tp,   "COAD_miRNA_upregulated_TP_vs_NT.csv",   row.names = TRUE)
+#write.csv(down_tp, "COAD_miRNA_downregulated_TP_vs_NT.csv", row.names = TRUE)
+#write.csv(sig_all, "COAD_miRNA_significant_TP_vs_NT.csv",   row.names = TRUE)
 
 # =============================================================================
 # End of pipeline
