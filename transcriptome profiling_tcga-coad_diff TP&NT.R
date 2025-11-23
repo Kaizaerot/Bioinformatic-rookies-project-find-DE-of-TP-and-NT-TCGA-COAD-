@@ -15,7 +15,7 @@ suppressPackageStartupMessages({
 
 # ------------------------------- 1) Settings ---------------------------------
 fdr_cutoff   <- 0.05          # significance threshold after multiple testing
-lfc_cutoff   <- 1.0           # sets the log₂ fold change threshold # |log2FC| >= 1 (≈2x change)
+lfc_cutoff   <- 0.5           # sets the log₂ fold change threshold # |log2FC| >= 1 (≈2x change)
 label_top_n  <- 20            # number of miRNAs to label on the plot
 set.seed(42)                  # fixes randomization for reproducibility
 
@@ -122,21 +122,35 @@ volc <- de %>%
 
 # Top 5 TP using FDR
 top5_tp_fdr <- volc %>%
-  filter(status == "Up (TP)", !is.na(FDR)) %>%
+  filter(status == "Up (TP)", !is.na(FDR)) %>% #Upregulate
+  arrange(FDR) %>%
+  slice_head(n = 5)
+
+top5_nt_fdr <- volc %>%
+  filter(status == "Down (NT)", !is.na(FDR)) %>% #Dowmregulate
   arrange(FDR) %>%
   slice_head(n = 5)
 
 #Top 10 TP using raw P-value
 top10_tp_p <- volc %>%
-  filter(status == "Up (TP)", !is.na(PValue)) %>%
+  filter(status == "Up (TP)", !is.na(PValue)) %>% #Upregulate
   arrange(PValue) %>%
   slice_head(n = 10)
 
-#
+top10_nt_p <- volc %>%
+  filter(status == "Down (NT)", !is.na(PValue)) %>% #Dowmregulate
+  arrange(PValue) %>%
+  slice_head(n = 10)
+
+# Add rowname for labeling
 top5_tp_fdr <- top5_tp_fdr %>%
+  tibble::rownames_to_column("miRNA_ID")
+top5_nt_fdr <- top5_nt_fdr %>%
   tibble::rownames_to_column("miRNA_ID")
 
 top10_tp_p <- top10_tp_p %>%
+  tibble::rownames_to_column("miRNA_ID")
+top10_nt_p <- top10_nt_p %>%
   tibble::rownames_to_column("miRNA_ID")
 
 # ----------------------------- 8) Volcano Plot -------------------------------
@@ -155,18 +169,29 @@ p_volcano_fdr <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   # points
   geom_point(aes(color = status), size = 1.8, alpha = 0.8) +
   # threshold lines
-  geom_hline(yintercept = y_cut, linetype = "dashed", linewidth = 0.4) +
+  geom_hline(yintercept = y_cut,
+             linetype = "dashed",
+             color = "grey60",
+             linewidth = 0.5) +
   geom_vline(xintercept = c(-lfc_cutoff, lfc_cutoff),
              linetype = "dashed", color = "grey60", linewidth = 0.4) +
   
-  # Labeling top 5 FDR
+  # Labeling top 5 TP/NT FDR
   ggrepel::geom_text_repel(
     data = top5_tp_fdr,
     aes(label = miRNA_ID),
     size = 3,
     max.overlaps = Inf,
     box.padding = 0.3,
-    point.padding = 0.3
+    point.padding = 0.2
+  )+
+  ggrepel::geom_text_repel(
+    data = top5_nt_fdr,
+    aes(label = miRNA_ID),
+    size = 3,
+    max.overlaps = Inf,
+    box.padding = 0.3,
+    point.padding = 0.2
   )+
   # colors & labels
   scale_color_manual(values = c("Up (TP)"="#FF3030",
@@ -180,7 +205,7 @@ p_volcano_fdr <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   ) +
   coord_cartesian(
     xlim = c(-10, 10),
-    ylim = c(0, max(volc$neglog10FDR, na.rm = TRUE) * 1.05)
+    ylim = c(0, 300)
   ) +
   theme_light(base_size = 13) +
   theme(
@@ -193,6 +218,7 @@ p_volcano_fdr <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   )
 
 #print(p_volcano_fdr)
+#ggsave("Volcano_TP_vs_NT_TALL.png", p_volcano_fdr,width = 6, height = 12, dpi = 300)
 
 #--------------Volcano plot lable by top 10 TP(raw p-value)--------------------
 message(">> Plotting volcano (top 10 TP raw p-value)...")
@@ -213,9 +239,17 @@ p_volcano_p <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   geom_vline(xintercept = c(-lfc_cutoff, lfc_cutoff),
              linetype = "dashed", color = "grey60", linewidth = 0.4) +
   
-  # Labeling top 10 P value
+  # Labeling top 10 TP/NT P-value
   ggrepel::geom_text_repel(
     data = top10_tp_p,
+    aes(label = miRNA_ID),
+    size = 3,
+    max.overlaps = Inf,
+    box.padding = 0.3,
+    point.padding = 0.2
+  )+
+  ggrepel::geom_text_repel(
+    data = top10_nt_p,
     aes(label = miRNA_ID),
     size = 3,
     max.overlaps = Inf,
@@ -235,7 +269,7 @@ p_volcano_p <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   ) +
   coord_cartesian(
     xlim = c(-10, 10),
-    ylim = c(0, max(volc$neglog10FDR, na.rm = TRUE) * 1.05)
+    ylim = c(0, 300)
   ) +
   theme_light(base_size = 13) +
   theme(
@@ -248,7 +282,7 @@ p_volcano_p <- ggplot(volc, aes(x = logFC, y = neglog10FDR)) +
   )
 
 #print(p_volcano_p)
-# ggsave("Volcano_TP_vs_NT_COAD.png", p_volcano, width = 7, height = 6, dpi = 300)
+# ggsave("Volcano_TP_vs_NT_COAD.png", p_volcano, width = 6, height = 12, dpi = 300)
 
 #---------------- 9.) Export DE -----------------------------
 
