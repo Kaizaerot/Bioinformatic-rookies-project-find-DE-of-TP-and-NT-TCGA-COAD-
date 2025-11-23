@@ -1,4 +1,4 @@
 RESULTS: Plotting with volcano graph. Showing 2 results of Tumor Primary upregulate effectivess. Providing 1.) top 5 using FDR and 2.) top 10 using P-Value
 
-<img width="1087" height="773" alt="top 5 p fdr tcga-coad trans" src="https://github.com/user-attachments/assets/ea3f6423-f843-4d8f-a180-fcec346f0372" />
-<img width="1087" height="773" alt="top 10 p value tcga-coad trans" src="https://github.com/user-attachments/assets/bd159117-7b48-42ce-9a74-5fd4efcdb58d" />
+<img width="1152" height="773" alt="Volcano graph Top 5 FDR" src="https://github.com/user-attachments/assets/a3ba61e1-5251-462d-8233-69812203c4fe" />
+<img width="1152" height="773" alt="Volcano graph Top 10 P-Value" src="https://github.com/user-attachments/assets/8b86bcdb-2636-43a4-b648-bfea03140498" />
